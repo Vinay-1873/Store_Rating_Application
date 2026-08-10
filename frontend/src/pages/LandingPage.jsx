@@ -40,26 +40,25 @@ export default function LandingPage() {
   useEffect(() => {
     let socket;
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const envBackend = import.meta.env.VITE_BACKEND_URL || '';
-    const base = envBackend || (isLocal ? `https://your-render-backend-url.onrender.com` : '');
+    const base = import.meta.env.VITE_BACKEND_URL || (isLocal ? 'http://localhost:5000' : 'https://store-rating-application-udwi.onrender.com');
 
     const fetchTop = async () => {
       try {
         const res = await fetch(`${base}/api/stores/top`);
         if (!res.ok) return;
         const body = await res.json();
-        setTopStores(body.data.stores || []);
+        setTopStores(body.data?.stores || []);
       } catch (e) {
-          console.error('Failed to fetch top stores', e);
+        console.error('Failed to fetch top stores', e);
       }
     };
 
     fetchTop();
 
     try {
-      socket = ioClient(base || undefined);
+      socket = ioClient(base);
       socket.on('connect', () => {
-        // connected
+        console.log('Connected to live feed!');
       });
       socket.on('storesUpdate', (payload) => {
         setTopStores(payload || []);
@@ -172,23 +171,24 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-6 space-y-4">
-              {(topStores.length ? topStores : [
-                { name: 'Golden Market', meta: '4.9 • 128 reviews', overallRating: 4.9 },
-                { name: 'Bloom Cafe', meta: '4.8 • 97 reviews', overallRating: 4.8 },
-                { name: 'Northside Gallery', meta: '4.7 • 84 reviews', overallRating: 4.7 }
-              ]).map((s, idx) => (
-                <div key={s.id || idx} className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">{s.name}</p>
-                      <p className="mt-1 text-sm text-slate-400">{s.meta || `${s.overallRating} • ${s.reviews || ''}`}</p>
-                    </div>
-                    <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-300 flex items-center gap-2">
-                      <Star className="h-4 w-4 text-emerald-300" /> {s.overallRating ?? '—'}
+              {/* BUG FIX 2: Removed fake placeholder data. Now it accurately reflects your DB! */}
+              {topStores.length > 0 ? (
+                topStores.map((s, idx) => (
+                  <div key={s.id || idx} className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">{s.name}</p>
+                        <p className="mt-1 text-sm text-slate-400">{s.meta || `${s.overallRating} • ${s.reviews || '0'} reviews`}</p>
+                      </div>
+                      <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-300 flex items-center gap-2">
+                        <Star className="h-4 w-4 text-emerald-300" /> {s.overallRating ?? '—'}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="py-4 text-center text-sm text-slate-400">Waiting for live store data...</p>
+              )}
             </div>
           </div>
         </section>
