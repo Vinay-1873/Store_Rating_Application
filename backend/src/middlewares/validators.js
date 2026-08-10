@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator');
 
 const registerValidation = [
   body('name')
-    .isLength({ min: 20, max: 60 })
+    .isLength({ min: 5, max: 60 })
     .withMessage('Name must be between 20 and 60 characters.'),
   body('email')
     .isEmail()
