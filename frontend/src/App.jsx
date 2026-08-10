@@ -7,6 +7,7 @@ import DashboardLayout from './layouts/DashboardLayout'; // <-- Import the layou
 // Import our pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import LandingPage from './pages/LandingPage';
 import AdminDashboard from './pages/AdminDashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
 import Explore from './pages/Explore';
@@ -18,11 +19,12 @@ function App() {
         <div className="min-h-screen bg-gray-50 text-gray-900">
           <Routes>
             {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            {/* Catch-all redirect to login */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* Catch-all redirect to landing page */}
+            <Route path="*" element={<Navigate to="/" replace />} />
 
             {/* ALL Protected Routes wrapped in the DashboardLayout */}
             <Route element={<DashboardLayout />}>

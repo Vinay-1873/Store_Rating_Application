@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import UpdatePasswordModal from '../components/UpdatePasswordModal';
@@ -15,6 +15,22 @@ export default function DashboardLayout() {
     navigate('/login');
   };
 
+  const getNavLinks = () => {
+    const links = [{ to: '/', label: 'Home' }];
+
+    if (user?.role === 'System Administrator') {
+      links.push({ to: '/admin/dashboard', label: 'Dashboard' });
+    } else if (user?.role === 'Store Owner') {
+      links.push({ to: '/owner/dashboard', label: 'Dashboard' });
+    } else if (user?.role === 'Normal User') {
+      links.push({ to: '/explore', label: 'Explore' });
+    }
+
+    return links;
+  };
+
+  const navLinks = getNavLinks();
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Top Navigation Bar */}
@@ -22,10 +38,26 @@ export default function DashboardLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Left side - Brand */}
-            <div className="flex items-center">
-              <span className="text-xl font-bold text-blue-600">
+            <div className="flex items-center gap-6">
+              <Link to="/" className="text-xl font-bold text-blue-600">
                 StoreRating Pro
-              </span>
+              </Link>
+
+              <div className="hidden md:flex items-center gap-2">
+                {navLinks.map((link) => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    className={({ isActive }) =>
+                      `rounded-full px-3 py-2 text-sm font-medium transition ${
+                        isActive ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      }`
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
+                ))}
+              </div>
             </div>
 
             {/* Right side - User Info & Actions */}
