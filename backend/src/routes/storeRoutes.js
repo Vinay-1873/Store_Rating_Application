@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createStore, getAllStores, getStoresForNormalUser } = require('../controllers/storeController');
+const { createStore, getAllStores, getStoresForNormalUser, getTopStores } = require('../controllers/storeController');
 const { createStoreValidation, validate } = require('../middlewares/validators');
 const { verifyToken, restrictTo } = require('../middlewares/authMiddleware');
 
@@ -26,5 +26,8 @@ router.get(
   restrictTo('Normal User'),
   getStoresForNormalUser
 );
+
+// Public endpoint for top stores (used by landing page)
+router.get('/top', getTopStores);
 
 module.exports = router;

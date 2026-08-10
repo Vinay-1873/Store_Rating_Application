@@ -131,3 +131,29 @@ exports.getStoresForNormalUser = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getTopStores = async (req, res, next) => {
+  try {
+    const ratingSubq = `(
+      SELECT COALESCE(ROUND(AVG("value"), 1), 0)
+      FROM "ratings"
+      WHERE "ratings"."storeId" = "Store"."id"
+    )`;
+
+    const topStores = await Store.findAll({
+      attributes: {
+        include: [[sequelize.literal(ratingSubq), 'overallRating']]
+      },
+      order: [[sequelize.literal(ratingSubq), 'DESC']],
+      limit: 5
+    });
+
+    res.status(200).json({
+      status: 'success',
+      results: topStores.length,
+      data: { stores: topStores }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

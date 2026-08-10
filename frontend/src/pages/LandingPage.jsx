@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BadgeCheck, Compass, HeartHandshake, Sparkles, Star } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
+import { io as ioClient } from 'socket.io-client';
 
 const features = [
   {
@@ -32,6 +34,44 @@ export default function LandingPage() {
     if (user?.role === 'Normal User') return '/explore';
     return '/login';
   };
+
+  const [topStores, setTopStores] = useState([]);
+
+  useEffect(() => {
+    let socket;
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const envBackend = import.meta.env.VITE_BACKEND_URL || '';
+    const base = envBackend || (isLocal ? `http://localhost:5000` : '');
+
+    const fetchTop = async () => {
+      try {
+        const res = await fetch(`${base}/api/stores/top`);
+        if (!res.ok) return;
+        const body = await res.json();
+        setTopStores(body.data.stores || []);
+      } catch (e) {
+          console.error('Failed to fetch top stores', e);
+      }
+    };
+
+    fetchTop();
+
+    try {
+      socket = ioClient(base || undefined);
+      socket.on('connect', () => {
+        // connected
+      });
+      socket.on('storesUpdate', (payload) => {
+        setTopStores(payload || []);
+      });
+    } catch (e) {
+      console.error('Socket connection failed', e);
+    }
+
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  }, []);
 
   return (
     <div id="top" className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.15),_transparent_35%),linear-gradient(135deg,_#f8fbff_0%,_#eef4ff_100%)] text-slate-900">
@@ -132,19 +172,19 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-6 space-y-4">
-              {[
-                ['Golden Market', '4.9 • 128 reviews'],
-                ['Bloom Cafe', '4.8 • 97 reviews'],
-                ['Northside Gallery', '4.7 • 84 reviews'],
-              ].map(([name, meta]) => (
-                <div key={name} className="rounded-2xl border border-white/10 bg-white/10 p-4">
+              {(topStores.length ? topStores : [
+                { name: 'Golden Market', meta: '4.9 • 128 reviews', overallRating: 4.9 },
+                { name: 'Bloom Cafe', meta: '4.8 • 97 reviews', overallRating: 4.8 },
+                { name: 'Northside Gallery', meta: '4.7 • 84 reviews', overallRating: 4.7 }
+              ]).map((s, idx) => (
+                <div key={s.id || idx} className="rounded-2xl border border-white/10 bg-white/10 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold">{name}</p>
-                      <p className="mt-1 text-sm text-slate-400">{meta}</p>
+                      <p className="font-semibold">{s.name}</p>
+                      <p className="mt-1 text-sm text-slate-400">{s.meta || `${s.overallRating} • ${s.reviews || ''}`}</p>
                     </div>
-                    <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-300">
-                      ★ 5.0
+                    <div className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-300 flex items-center gap-2">
+                      <Star className="h-4 w-4 text-emerald-300" /> {s.overallRating ?? '—'}
                     </div>
                   </div>
                 </div>
