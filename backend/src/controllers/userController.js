@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { User } = require('../models');
+const { User, Store, Rating } = require('../models');
 
 exports.getAllUsers = async (req, res, next) => {
   try {
@@ -28,6 +28,21 @@ exports.getAllUsers = async (req, res, next) => {
       status: 'success',
       results: users.length,
       data: { users }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getDashboardStats = async (req, res, next) => {
+  try {
+    const totalUsers = await User.count();
+    const totalStores = await Store.count();
+    const totalRatings = await Rating.count();
+
+    res.status(200).json({
+      status: 'success',
+      data: { totalUsers, totalStores, totalRatings }
     });
   } catch (error) {
     next(error);

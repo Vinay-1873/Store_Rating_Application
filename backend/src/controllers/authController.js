@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, address, password } = req.body;
+    const { name, email, address, password, role} = req.body;
 
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
@@ -21,7 +21,8 @@ exports.register = async (req, res, next) => {
       name,
       email,
       address,
-      password: hashedPassword
+      password: hashedPassword,
+      role: role || 'Normal User'
     });
 
     res.status(201).json({

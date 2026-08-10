@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
-const { Store, User, Rating, sequelize } = require('../models');
+const { Store, User, Rating } = require('../models');
+const sequelize = require('../config/database');
 
 exports.createStore = async (req, res, next) => {
   try {

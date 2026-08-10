@@ -3,6 +3,14 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const { verifyToken, restrictTo } = require('../middlewares/authMiddleware');
 
+
+router.get(
+  '/stats', 
+  verifyToken, 
+  restrictTo('System Administrator'), 
+  userController.getDashboardStats 
+);
+
 router.get(
   '/', 
   verifyToken, 
