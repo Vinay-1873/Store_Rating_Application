@@ -41,7 +41,7 @@ export default function LandingPage() {
     let socket;
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const envBackend = import.meta.env.VITE_BACKEND_URL || '';
-    const base = envBackend || (isLocal ? `http://localhost:5000` : '');
+    const base = envBackend || (isLocal ? `https://your-render-backend-url.onrender.com` : '');
 
     const fetchTop = async () => {
       try {
